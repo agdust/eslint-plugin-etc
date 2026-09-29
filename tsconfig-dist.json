@@ -1,9 +1,11 @@
 {
-  "compilerOptions": {
-    "outDir": "dist"
-  },
   "extends": "./tsconfig.json",
-  "include": [
-    "source/**/*.ts"
-  ]
+  "compilerOptions": {
+    "rootDir": "source",
+    "outDir": "dist",
+    "removeComments": false,
+    "types": ["node"]
+  },
+  "include": ["source/**/*.ts"],
+  "exclude": []
 }

@@ -3,10 +3,7 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-import {
-  TSESLint as eslint,
-  TSESTree as es,
-} from "@typescript-eslint/experimental-utils";
+import { TSESLint as eslint, TSESTree as es } from "@typescript-eslint/utils";
 import { ruleCreator } from "../utils";
 
 const rule = ruleCreator({
@@ -14,7 +11,6 @@ const rule = ruleCreator({
   meta: {
     docs: {
       description: "Forbids greater-than comparisons.",
-      recommended: false,
     },
     fixable: "code",
     hasSuggestions: true,
@@ -31,12 +27,12 @@ const rule = ruleCreator({
   create: (context) => {
     return {
       "BinaryExpression[operator=/^(>|>=)$/]": (
-        expression: es.BinaryExpression
+        expression: es.BinaryExpression,
       ) => {
         const gte = expression.operator === ">=";
         function fix(fixer: eslint.RuleFixer) {
           const { left, right } = expression;
-          const sourceCode = context.getSourceCode();
+          const { sourceCode } = context;
           const operator = sourceCode.getTokenAfter(left);
           return operator
             ? [

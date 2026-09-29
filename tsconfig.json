@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
-    "declaration": false,
-    "importHelpers": true,
+    "declaration": true,
     "lib": ["esnext"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmitHelpers": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "rootDir": ".",
     "outDir": "build",
-    "removeComments": true,
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,
-    "target": "es2018"
+    "target": "es2022",
+    "types": ["node", "mocha"]
   },
-  "exclude": [],
-  "include": ["source/**/*.ts", "tests/**/*.ts"]
+  "include": ["source/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["tests/modules", "tests/file.tsx"]
 }

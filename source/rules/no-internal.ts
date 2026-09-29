@@ -3,8 +3,12 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-import { TSESTree as es } from "@typescript-eslint/experimental-utils";
-import { getParent, getParserServices } from "eslint-etc";
+import {
+  AST_NODE_TYPES,
+  ESLintUtils,
+  TSESTree as es,
+} from "@typescript-eslint/utils";
+import { getParent } from "../etc-utils";
 import * as ts from "typescript";
 import { findTaggedNames } from "../tag";
 import { getTags, isDeclaration } from "../tslint-tag";
@@ -23,7 +27,8 @@ const rule = ruleCreator({
   meta: {
     docs: {
       description: "Forbids the use of internal APIs.",
-      recommended: false,
+      recommended: true,
+      requiresTypeChecking: true,
     },
     fixable: undefined,
     hasSuggestions: false,
@@ -41,7 +46,7 @@ const rule = ruleCreator({
     type: "problem",
   },
   name: "no-internal",
-  create: (context, unused: typeof defaultOptions) => {
+  create: (context) => {
     const [{ ignored = {} } = {}] = context.options;
     const ignoredNameRegExps: RegExp[] = [];
     const ignoredPathRegExps: RegExp[] = [];
@@ -57,7 +62,8 @@ const rule = ruleCreator({
           break;
       }
     });
-    const { esTreeNodeToTSNodeMap, program } = getParserServices(context);
+    const { esTreeNodeToTSNodeMap, program } =
+      ESLintUtils.getParserServices(context);
     const typeChecker = program.getTypeChecker();
     const getPath = (identifier: ts.Identifier) => {
       const type = typeChecker.getTypeAtLocation(identifier);
@@ -71,10 +77,10 @@ const rule = ruleCreator({
     return {
       Identifier: (node: es.Identifier) => {
         switch (getParent(node)?.type) {
-          case "ExportSpecifier":
-          case "ImportDefaultSpecifier":
-          case "ImportNamespaceSpecifier":
-          case "ImportSpecifier":
+          case AST_NODE_TYPES.ExportSpecifier:
+          case AST_NODE_TYPES.ImportDefaultSpecifier:
+          case AST_NODE_TYPES.ImportNamespaceSpecifier:
+          case AST_NODE_TYPES.ImportSpecifier:
             return;
           default:
             break;

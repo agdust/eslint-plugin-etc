@@ -1,3 +1,22 @@
+<a name="3.0.0"></a>
+
+## 3.0.0 (unreleased): `@agdust/eslint-plugin-etc`
+
+Maintained fork of `eslint-plugin-etc`.
+
+## Breaking Changes
+
+- Published as `@agdust/eslint-plugin-etc`.
+- ESLint 9 and 10 flat config only. Peer dependencies: `eslint ^9 || ^10`, `typescript >=5.0 <6.1`.
+- Removed rules that have maintained equivalents: `no-commented-out-code`, `no-deprecated`, `no-enum`, `no-foreach`, `no-implicit-any-catch`, `no-misused-generics`, `no-t`, `prefer-interface`, `throw-error`. The README has a migration table.
+- `recommended` now contains `no-assign-mutated-array` and `no-internal`.
+
+## Changes
+
+- typescript-eslint 8 (`@typescript-eslint/utils`), `ts-api-utils` instead of `tsutils`. The small helpers used from `eslint-etc`/`tsutils-etc` are vendored.
+- Rules use `context.sourceCode` (`context.getSourceCode()` was removed in ESLint 10).
+- Rule metadata declares `requiresTypeChecking`.
+
 <a name="2.0.3"></a>
 
 ## [2.0.3](https://github.com/cartant/eslint-plugin-etc/compare/v2.0.2...v2.0.3) (2023-05-10)

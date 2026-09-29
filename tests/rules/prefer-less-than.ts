@@ -4,7 +4,7 @@
  */
 
 import { stripIndent } from "common-tags";
-import { fromFixture } from "eslint-etc";
+import { fromFixture } from "../fixture";
 import rule = require("../../source/rules/prefer-less-than");
 import { ruleTester } from "../utils";
 
@@ -37,7 +37,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -56,7 +56,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -75,7 +75,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -94,7 +94,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -113,7 +113,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -132,7 +132,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -151,7 +151,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
     fromFixture(
       stripIndent`
@@ -170,7 +170,7 @@ ruleTester({ types: false }).run("prefer-less-than", rule, {
             `,
           },
         ],
-      }
+      },
     ),
   ],
 });

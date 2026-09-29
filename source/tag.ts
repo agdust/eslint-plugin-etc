@@ -8,7 +8,7 @@ import * as ts from "typescript";
 
 export function findTaggedNames(
   tagName: string,
-  program: ts.Program
+  program: ts.Program,
 ): Set<string> {
   const taggedNames = new Set<string>();
   program.getSourceFiles().forEach((sourceFile) => {
@@ -17,7 +17,7 @@ export function findTaggedNames(
     }
     const nodes = tsquery(
       sourceFile,
-      `ClassDeclaration, Constructor, EnumDeclaration, EnumMember, FunctionDeclaration, GetAccessor, InterfaceDeclaration, MethodDeclaration, MethodSignature, PropertyDeclaration, PropertySignature, SetAccessor, TypeAliasDeclaration, VariableDeclaration`
+      `ClassDeclaration, Constructor, EnumDeclaration, EnumMember, FunctionDeclaration, GetAccessor, InterfaceDeclaration, MethodDeclaration, MethodSignature, PropertyDeclaration, PropertySignature, SetAccessor, TypeAliasDeclaration, VariableDeclaration`,
     );
     nodes.forEach((node) => {
       const tags = ts.getJSDocTags(node);

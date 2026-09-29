@@ -3,8 +3,8 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-import { TSESTree as es } from "@typescript-eslint/experimental-utils";
-import { findParent, getParserServices, isIdentifier } from "eslint-etc";
+import { ESLintUtils, TSESTree as es } from "@typescript-eslint/utils";
+import { findParent, isIdentifier } from "../etc-utils";
 import * as ts from "typescript";
 import { getTagsFromDeclaration } from "../tslint-tag";
 import { ruleCreator } from "../utils";
@@ -15,7 +15,7 @@ const rule = ruleCreator({
     docs: {
       description:
         "Forbids internal APIs that are not prefixed with underscores.",
-      recommended: false,
+      requiresTypeChecking: true,
     },
     fixable: undefined,
     hasSuggestions: false,
@@ -27,7 +27,7 @@ const rule = ruleCreator({
   },
   name: "underscore-internal",
   create: (context) => {
-    const { esTreeNodeToTSNodeMap } = getParserServices(context);
+    const { esTreeNodeToTSNodeMap } = ESLintUtils.getParserServices(context);
 
     function checkDeclaration(identifier: es.BindingName, tsNode: ts.Node) {
       const tags = getTagsFromDeclaration("internal", tsNode);
@@ -51,7 +51,7 @@ const rule = ruleCreator({
         }
       },
       "FunctionDeclaration[id.name=/^[^_]/]": (
-        node: es.FunctionDeclaration
+        node: es.FunctionDeclaration,
       ) => {
         if (node.id) {
           checkDeclaration(node.id, esTreeNodeToTSNodeMap.get(node));
@@ -71,7 +71,7 @@ const rule = ruleCreator({
         }
       },
       "TSInterfaceDeclaration[id.name=/^[^_]/]": (
-        node: es.TSInterfaceDeclaration
+        node: es.TSInterfaceDeclaration,
       ) => {
         checkDeclaration(node.id, esTreeNodeToTSNodeMap.get(node));
       },
@@ -81,14 +81,14 @@ const rule = ruleCreator({
         }
       },
       "TSPropertySignature[key.name=/^[^_]/]": (
-        node: es.TSPropertySignature
+        node: es.TSPropertySignature,
       ) => {
         if (isIdentifier(node.key)) {
           checkDeclaration(node.key, esTreeNodeToTSNodeMap.get(node));
         }
       },
       "TSTypeAliasDeclaration[id.name=/^[^_]/]": (
-        node: es.TSTypeAliasDeclaration
+        node: es.TSTypeAliasDeclaration,
       ) => {
         checkDeclaration(node.id, esTreeNodeToTSNodeMap.get(node));
       },
@@ -96,8 +96,8 @@ const rule = ruleCreator({
         checkDeclaration(
           node.id,
           esTreeNodeToTSNodeMap.get(
-            findParent(node, "VariableDeclaration") as es.VariableDeclaration
-          )
+            findParent(node, "VariableDeclaration") as es.VariableDeclaration,
+          ),
         );
       },
     };

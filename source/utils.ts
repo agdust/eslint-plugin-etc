@@ -3,9 +3,14 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-import { ESLintUtils } from "@typescript-eslint/experimental-utils";
+import { ESLintUtils } from "@typescript-eslint/utils";
 
-export const ruleCreator = ESLintUtils.RuleCreator(
+export interface EtcDocs {
+  recommended?: boolean;
+  requiresTypeChecking?: boolean;
+}
+
+export const ruleCreator = ESLintUtils.RuleCreator<EtcDocs>(
   (name) =>
-    `https://github.com/cartant/eslint-plugin-etc/tree/main/docs/rules/${name}.md`
+    `https://github.com/agdust/eslint-plugin-etc/tree/main/docs/rules/${name}.md`,
 );

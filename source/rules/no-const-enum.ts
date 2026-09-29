@@ -3,9 +3,9 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-import { TSESTree as es } from "@typescript-eslint/experimental-utils";
-import { getLoc, getParserServices } from "eslint-etc";
-import * as tsutils from "tsutils";
+import { ESLintUtils, TSESTree as es } from "@typescript-eslint/utils";
+import { includesModifier } from "ts-api-utils";
+import { getLoc } from "../etc-utils";
 import * as ts from "typescript";
 import { ruleCreator } from "../utils";
 
@@ -18,7 +18,7 @@ const rule = ruleCreator({
   meta: {
     docs: {
       description: "Forbids the use of `const enum`.",
-      recommended: false,
+      requiresTypeChecking: true,
     },
     fixable: undefined,
     hasSuggestions: false,
@@ -36,27 +36,24 @@ const rule = ruleCreator({
     type: "problem",
   },
   name: "no-const-enum",
-  create: (context, unused: typeof defaultOptions) => ({
+  create: (context) => ({
     TSEnumDeclaration: (node: es.Node) => {
       const [{ allowLocal = false } = {}] = context.options;
-      const { esTreeNodeToTSNodeMap } = getParserServices(context);
+      const { esTreeNodeToTSNodeMap } = ESLintUtils.getParserServices(context);
       const enumDeclaration = esTreeNodeToTSNodeMap.get(
-        node
+        node,
       ) as ts.EnumDeclaration;
       if (
         allowLocal &&
-        !tsutils.hasModifier(
+        !includesModifier(
           enumDeclaration.modifiers,
-          ts.SyntaxKind.ExportKeyword
+          ts.SyntaxKind.ExportKeyword,
         )
       ) {
         return;
       }
       if (
-        !tsutils.hasModifier(
-          enumDeclaration.modifiers,
-          ts.SyntaxKind.ConstKeyword
-        )
+        !includesModifier(enumDeclaration.modifiers, ts.SyntaxKind.ConstKeyword)
       ) {
         return;
       }

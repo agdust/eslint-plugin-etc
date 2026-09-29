@@ -3,17 +3,17 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-import { TSESTree as es } from "@typescript-eslint/experimental-utils";
+import { ESLintUtils, TSESTree as es } from "@typescript-eslint/utils";
 import {
+  couldBeType,
   getParent,
-  getTypeServices,
   isArrayExpression,
   isCallExpression,
   isExpressionStatement,
   isIdentifier,
   isMemberExpression,
   isNewExpression,
-} from "eslint-etc";
+} from "../etc-utils";
 import { ruleCreator } from "../utils";
 
 const mutatorRegExp = /^(fill|reverse|sort)$/;
@@ -24,7 +24,8 @@ const rule = ruleCreator({
   meta: {
     docs: {
       description: "Forbids the assignment of returned, mutated arrays.",
-      recommended: false,
+      recommended: true,
+      requiresTypeChecking: true,
     },
     fixable: undefined,
     hasSuggestions: false,
@@ -36,17 +37,24 @@ const rule = ruleCreator({
   },
   name: "no-assign-mutated-array",
   create: (context) => {
-    const { couldBeType } = getTypeServices(context);
+    const { esTreeNodeToTSNodeMap, program } =
+      ESLintUtils.getParserServices(context);
+    const typeChecker = program.getTypeChecker();
+    const couldBeArray = (node: es.Node) =>
+      couldBeType(
+        typeChecker.getTypeAtLocation(esTreeNodeToTSNodeMap.get(node)),
+        "Array",
+      );
     return {
       [`CallExpression > MemberExpression[property.name=${mutatorRegExp.toString()}]`]:
         (memberExpression: es.MemberExpression) => {
           const callExpression = getParent(
-            memberExpression
+            memberExpression,
           ) as es.CallExpression;
           const parent = getParent(callExpression);
           if (parent && !isExpressionStatement(parent)) {
             if (
-              couldBeType(memberExpression.object, "Array") &&
+              couldBeArray(memberExpression.object) &&
               mutatesReferencedArray(callExpression)
             ) {
               context.report({
@@ -58,7 +66,7 @@ const rule = ruleCreator({
         },
     };
 
-    function isNewArray(node: es.LeftHandSideExpression): boolean {
+    function isNewArray(node: es.Expression): boolean {
       if (isArrayExpression(node)) {
         return true;
       }
@@ -82,7 +90,7 @@ const rule = ruleCreator({
     }
 
     function mutatesReferencedArray(
-      callExpression: es.CallExpression
+      callExpression: es.CallExpression,
     ): boolean {
       if (isMemberExpression(callExpression.callee)) {
         const memberExpression = callExpression.callee;

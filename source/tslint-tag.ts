@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as tsutils from "tsutils";
+import { AccessKind, getAccessKind, isSymbolFlagSet } from "ts-api-utils";
 import * as ts from "typescript";
 
 export function isDeclaration(identifier: ts.Identifier): boolean {
@@ -47,8 +47,8 @@ export function isDeclaration(identifier: ts.Identifier): boolean {
     case ts.SyntaxKind.PropertyAssignment:
       return (
         (parent as ts.PropertyAssignment).name === identifier &&
-        !tsutils.isReassignmentTarget(
-          identifier.parent.parent as ts.ObjectLiteralExpression
+        !isReassignmentTarget(
+          identifier.parent.parent as ts.ObjectLiteralExpression,
         )
       );
     case ts.SyntaxKind.BindingElement:
@@ -63,15 +63,15 @@ export function isDeclaration(identifier: ts.Identifier): boolean {
 }
 
 function getCallExpresion(
-  node: ts.Expression
+  node: ts.Expression,
 ): ts.CallLikeExpression | undefined {
   let parent = node.parent;
-  if (tsutils.isPropertyAccessExpression(parent) && parent.name === node) {
+  if (ts.isPropertyAccessExpression(parent) && parent.name === node) {
     node = parent;
     parent = node.parent;
   }
-  return tsutils.isTaggedTemplateExpression(parent) ||
-    ((tsutils.isCallExpression(parent) || tsutils.isNewExpression(parent)) &&
+  return ts.isTaggedTemplateExpression(parent) ||
+    ((ts.isCallExpression(parent) || ts.isNewExpression(parent)) &&
       parent.expression === node)
     ? parent
     : undefined;
@@ -80,13 +80,13 @@ function getCallExpresion(
 export function getTags(
   tagName: string,
   node: ts.Identifier,
-  tc: ts.TypeChecker
+  tc: ts.TypeChecker,
 ): string[] {
   const callExpression = getCallExpresion(node);
   if (callExpression !== undefined) {
     const result = getSignatureTags(
       tagName,
-      tc.getResolvedSignature(callExpression)
+      tc.getResolvedSignature(callExpression),
     );
     if (result.length > 0) {
       return result;
@@ -97,20 +97,17 @@ export function getTags(
   if (parent.kind === ts.SyntaxKind.BindingElement) {
     symbol = tc.getTypeAtLocation(parent.parent).getProperty(node.text);
   } else if (
-    (tsutils.isPropertyAssignment(parent) && parent.name === node) ||
-    (tsutils.isShorthandPropertyAssignment(parent) &&
+    (ts.isPropertyAssignment(parent) && parent.name === node) ||
+    (ts.isShorthandPropertyAssignment(parent) &&
       parent.name === node &&
-      tsutils.isReassignmentTarget(node))
+      isReassignmentTarget(node))
   ) {
     symbol = tc.getPropertySymbolOfDestructuringAssignment(node);
   } else {
     symbol = tc.getSymbolAtLocation(node);
   }
 
-  if (
-    symbol !== undefined &&
-    tsutils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)
-  ) {
+  if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
     symbol = tc.getAliasedSymbol(symbol);
   }
   if (
@@ -134,7 +131,7 @@ function findTags(tagName: string, tags: ts.JSDocTagInfo[]): string[] {
         result.push(tag.text);
       } else {
         result.push(
-          tag.text.reduce((text, part) => text.concat(part.text), "")
+          tag.text.reduce((text, part) => text.concat(part.text), ""),
         );
       }
     }
@@ -166,20 +163,20 @@ function getSignatureTags(tagName: string, signature?: ts.Signature): string[] {
 
 function getTagsFromDeclarations(
   tagName: string,
-  declarations?: ts.Declaration[]
+  declarations?: ts.Declaration[],
 ): string[] {
   if (declarations === undefined) {
     return [];
   }
   let declaration: ts.Node;
   for (declaration of declarations) {
-    if (tsutils.isBindingElement(declaration)) {
-      declaration = tsutils.getDeclarationOfBindingElement(declaration);
+    if (ts.isBindingElement(declaration)) {
+      declaration = getDeclarationOfBindingElement(declaration);
     }
-    if (tsutils.isVariableDeclaration(declaration)) {
+    if (ts.isVariableDeclaration(declaration)) {
       declaration = declaration.parent;
     }
-    if (tsutils.isVariableDeclarationList(declaration)) {
+    if (ts.isVariableDeclarationList(declaration)) {
       declaration = declaration.parent;
     }
     const result = getTagsFromDeclaration(tagName, declaration);
@@ -192,10 +189,10 @@ function getTagsFromDeclarations(
 
 export function getTagsFromDeclaration(
   tagName: string,
-  declaration: ts.Node
+  declaration: ts.Node,
 ): string[] {
   const result: string[] = [];
-  for (const comment of tsutils.getJsDoc(declaration)) {
+  for (const comment of getJsDoc(declaration)) {
     if (comment.tags === undefined) {
       continue;
     }
@@ -209,8 +206,8 @@ export function getTagsFromDeclaration(
           result.push(
             tag.comment.reduce(
               (text, node) => text.concat(node.getFullText()),
-              ""
-            )
+              "",
+            ),
           );
         }
       }
@@ -232,4 +229,31 @@ function isFunctionOrMethod(declarations?: ts.Declaration[]) {
     default:
       return false;
   }
+}
+
+// Ported from tsutils 3 (MIT, see THIRD_PARTY_NOTICES): not in ts-api-utils.
+
+function isReassignmentTarget(node: ts.Expression): boolean {
+  return (getAccessKind(node) & AccessKind.Write) !== 0;
+}
+
+function getDeclarationOfBindingElement(
+  node: ts.BindingElement,
+): ts.VariableDeclaration | ts.ParameterDeclaration {
+  let parent = node.parent.parent;
+  while (parent.kind === ts.SyntaxKind.BindingElement) {
+    parent = parent.parent.parent;
+  }
+  return parent;
+}
+
+function getJsDoc(node: ts.Node, sourceFile?: ts.SourceFile): ts.JSDoc[] {
+  const result: ts.JSDoc[] = [];
+  for (const child of node.getChildren(sourceFile)) {
+    if (!ts.isJSDoc(child)) {
+      break;
+    }
+    result.push(child);
+  }
+  return result;
 }

@@ -2,10 +2,11 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "jsx": "react",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "skipLibCheck": true,
-    "target": "esnext"
+    "target": "esnext",
+    "types": []
   },
   "include": ["modules/*.ts"],
   "files": ["file.tsx"]

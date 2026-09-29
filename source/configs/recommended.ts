@@ -3,12 +3,9 @@
  * can be found in the LICENSE file at https://github.com/cartant/eslint-plugin-etc
  */
 
-export = {
-  plugins: ["etc"],
-  rules: {
-    "etc/no-assign-mutated-array": "error",
-    "etc/no-deprecated": "warn",
-    "etc/no-implicit-any-catch": "error",
-    "etc/no-internal": "error",
-  },
-};
+import type { TSESLint } from "@typescript-eslint/utils";
+
+export const recommendedRules = {
+  "etc/no-assign-mutated-array": "error",
+  "etc/no-internal": "error",
+} as const satisfies TSESLint.FlatConfig.Rules;
