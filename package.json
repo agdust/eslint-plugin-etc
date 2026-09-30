@@ -1,6 +1,6 @@
 {
   "name": "@agdust/eslint-plugin-etc",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "TypeScript ESLint rules from eslint-plugin-etc that have no modern equivalent. Maintained fork for ESLint 9/10 flat config.",
   "keywords": [
     "eslint",
