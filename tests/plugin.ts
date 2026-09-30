@@ -40,6 +40,9 @@ describe("plugin", () => {
             parserOptions: {
               project: "./tsconfig.json",
               tsconfigRootDir: resolve(__dirname),
+              // CI=true makes typescript-estree infer a single run, which builds
+              // the program from the on-disk placeholder instead of lintText's code
+              disallowAutomaticSingleRunInference: true,
             },
           },
         },

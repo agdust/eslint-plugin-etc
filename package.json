@@ -62,5 +62,8 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0",
     "typescript-eslint": "^8.71.0"
+  },
+  "volta": {
+    "node": "26.10.0"
   }
 }
