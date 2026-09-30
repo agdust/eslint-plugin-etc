@@ -16,6 +16,10 @@ Run a single test:
 npx mocha --require tsx/cjs --timeout 20000 tests/rules/no-internal.ts
 ```
 
+## Releasing
+
+Releases go only through `.github/workflows/publish.yaml` (npm Trusted Publishing, stage-only; tokens are disallowed on npm). Bump `version` + `CHANGELOG.md`, commit, push a `vX.Y.Z` tag (only repo admins can create tags), then approve the staged release with 2FA on npmjs.com or `npm stage approve`. The publish job installs no dependencies; keep it that way. `.npmrc` sets a 3-day `min-release-age` and `ignore-scripts=true` (so `prepublishOnly` doesn't run locally). CI workflows are linted by zizmor (`check-workflows.yaml`); pin every action by SHA.
+
 ## Architecture
 
 TypeScript source in **`source/`** (not `src/`), compiled to `dist/` (CommonJS).
