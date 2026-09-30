@@ -16,6 +16,16 @@ RuleTester.itOnly = it.only;
 const filename = "file.tsx";
 const tsconfigRootDir = resolve(__dirname);
 
+// RuleTester titles unnamed cases with their full source; collapse it to a
+// single truncated line so the mocha spec output stays readable.
+const maxNameLength = 80;
+function nameFor(code: string): string {
+  const line = code.replace(/\s+/g, " ").trim();
+  return line.length > maxNameLength
+    ? `${line.slice(0, maxNameLength - 1)}…`
+    : line;
+}
+
 export function ruleTester({
   comments = false,
   types = true,
@@ -33,11 +43,15 @@ export function ruleTester({
   const run = tester.run.bind(tester);
   tester.run = (name, rule, { invalid = [], valid = [] }) =>
     run(name, rule, {
-      invalid: invalid.map((test) => ({ ...test, filename })),
+      invalid: invalid.map((test) => ({
+        name: nameFor(test.code),
+        ...test,
+        filename,
+      })),
       valid: valid.map((test) =>
         typeof test === "string"
-          ? { code: test, filename }
-          : { ...test, filename },
+          ? { code: test, filename, name: nameFor(test) }
+          : { name: nameFor(test.code), ...test, filename },
       ),
     });
   return tester;
